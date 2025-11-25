@@ -378,21 +378,19 @@ function checkCollision(obj: {
   );
 }
 
+let stTime = Date.now();
+
 // End game
 function endGame() {
   gameRunning = false;
   gameOverText.visible = true;
   restartButton.visible = true;
 
-  // notifier.show(`Game Over! Final Score: ${score}`);
-
-  // Prompt for name and save score
-  setTimeout(() => {
-    const playerName = namePrompt();
-    if (playerName) {
-      LDBoard.saveScore(playerName, score, new Date().toLocaleDateString());
-    }
-  }, 500);
+  const playerName = namePrompt();
+  if (playerName) {
+    const elapsedTime = ((Date.now() - stTime) / 1000).toFixed(2) + "s";
+    LDBoard.saveScore(playerName, score, elapsedTime);
+  }
 }
 
 // Update game
@@ -485,6 +483,7 @@ function startGame() {
   startScreen.visible = false;
   restartButton.visible = false;
   lastSpawnTime = Date.now();
+  stTime = Date.now();
 
   // notifier.show("Game Started! Collect green, avoid red!");
 }
