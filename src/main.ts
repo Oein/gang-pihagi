@@ -13,8 +13,8 @@ let GAME_HEIGHT = BASE_HEIGHT;
 let scale = 1;
 const PLAYER_SIZE = 60;
 const OBJECT_SIZE = 80;
-const PLAYER_SPEED = 15;
-const GRAVITY = 0.15; // Gravity acceleration
+const PLAYER_SPEED = 30;
+const GRAVITY = 0.4; // Gravity acceleration
 const INITIAL_VELOCITY = 0; // Objects start with zero velocity
 const BASE_SPAWN_INTERVAL = 800; // milliseconds - starting interval
 const MIN_SPAWN_INTERVAL = 200; // milliseconds - minimum interval
@@ -394,7 +394,19 @@ function endGame() {
 }
 
 // Update game
+let lastFrameTime = 0;
+const targetFPS = 60;
+const frameInterval = 1000 / targetFPS;
+
 function update() {
+  const now = performance.now();
+
+  // Throttle to 60 FPS
+  if (now - lastFrameTime < frameInterval) {
+    return;
+  }
+  lastFrameTime = now;
+
   if (!gameRunning) return;
 
   // Move player
@@ -412,7 +424,7 @@ function update() {
   }
 
   // Spawn objects
-  const now = Date.now();
+  const currentTime = Date.now();
   // Calculate spawn interval based on score - decreases as score increases
   // At score 0: 1500ms, gradually decreases to 200ms minimum
   const currentSpawnInterval = Math.max(
@@ -420,9 +432,9 @@ function update() {
     BASE_SPAWN_INTERVAL - score * 10
   );
 
-  if (now - lastSpawnTime > currentSpawnInterval) {
+  if (currentTime - lastSpawnTime > currentSpawnInterval) {
     spawnObject();
-    lastSpawnTime = now;
+    lastSpawnTime = currentTime;
   }
 
   // Update objects
@@ -467,8 +479,11 @@ function update() {
   }
 }
 
-// Game loop
-two.bind("update", update);
+requestAnimationFrame(function animate() {
+  requestAnimationFrame(animate);
+  update();
+  two.update();
+});
 
 // Start game
 function startGame() {
