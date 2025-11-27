@@ -13,8 +13,8 @@ let GAME_HEIGHT = BASE_HEIGHT;
 let scale = 1;
 const PLAYER_SIZE = 60;
 const OBJECT_SIZE = 80;
-const PLAYER_SPEED = 30;
-const GRAVITY = 0.4; // Gravity acceleration
+const PLAYER_SPEED = 1200; // pixels per second
+const GRAVITY = 600; // pixels per second squared
 const INITIAL_VELOCITY = 0; // Objects start with zero velocity
 const BASE_SPAWN_INTERVAL = 800; // milliseconds - starting interval
 const MIN_SPAWN_INTERVAL = 200; // milliseconds - minimum interval
@@ -394,33 +394,27 @@ function endGame() {
 }
 
 // Update game
-let lastFrameTime = 0;
-const targetFPS = 60;
-const frameInterval = 1000 / targetFPS;
+let lastFrameTime = performance.now();
 
 function update() {
   const now = performance.now();
-
-  // Throttle to 60 FPS
-  if (now - lastFrameTime < frameInterval) {
-    return;
-  }
+  const deltaTime = (now - lastFrameTime) / 1000; // Convert to seconds
   lastFrameTime = now;
 
   if (!gameRunning) return;
 
-  // Move player
+  // Move player with delta time
   if (
     (keys["ArrowLeft"] || keys["a"] || keys["A"]) &&
     player.translation.x > PLAYER_SIZE / 2
   ) {
-    player.translation.x -= PLAYER_SPEED;
+    player.translation.x -= PLAYER_SPEED * deltaTime;
   }
   if (
     (keys["ArrowRight"] || keys["d"] || keys["D"]) &&
     player.translation.x < GAME_WIDTH - PLAYER_SIZE / 2
   ) {
-    player.translation.x += PLAYER_SPEED;
+    player.translation.x += PLAYER_SPEED * deltaTime;
   }
 
   // Spawn objects
@@ -441,11 +435,11 @@ function update() {
   for (let i = objects.length - 1; i >= 0; i--) {
     const obj = objects[i];
 
-    // Apply gravity to velocity
-    obj.velocity += GRAVITY;
+    // Apply gravity to velocity (delta time based)
+    obj.velocity += GRAVITY * deltaTime;
 
-    // Update position with velocity
-    obj.y += obj.velocity;
+    // Update position with velocity (delta time based)
+    obj.y += obj.velocity * deltaTime;
     obj.shape.translation.y = obj.y;
 
     // Check collision
